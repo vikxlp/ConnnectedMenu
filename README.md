@@ -41,7 +41,13 @@ git push origin v0.1.0-beta.1
 ## Build and run
 ```bash
 swift build
-swift run
+swift run ConnnectedMenu
+```
+
+## Run locally (recommended)
+```bash
+cd "/Users/jarvis24/X/Projects/AI Projects/Connnected"
+swift run ConnnectedMenu
 ```
 
 ## Notes
