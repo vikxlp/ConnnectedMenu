@@ -12,11 +12,15 @@
   - Refresh icon button
 - Main content:
   - Plain sectioned list (no card backgrounds)
-  - Section divider between top-level sections only
-  - No per-row divider
+- Section divider between top-level sections only
+- No per-row divider
 - Footer actions:
   - `Open System Information`
   - `Quit`
+
+## Distribution Notes
+- App installed via DMG packaged from release branch.
+- Gatekeeper workaround: first launch via right-click ▶ Open when build is unsigned.
 
 ## Tabs / Filters
 - `All`: shows all discovered rows.

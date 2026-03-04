@@ -47,3 +47,9 @@ swift run
 ## Notes
 - Port mapping is best-effort and depends on what macOS exposes.
 - Some settings deep-links vary by macOS release; if a URL does not open, use the fallback System Information button.
+
+## Install Beta
+- Download `Connects-v0.1.0-beta.1.dmg` from GitHub Releases.
+- Open the DMG, drag `Connects.app` to `/Applications`.
+- Launch once via right-click ▶ Open if Gatekeeper blocks the unsigned build; this registers the app.
+- Future versions will be notarized once Developer ID signing is enabled.
