@@ -1,0 +1,26 @@
+name: Release Beta
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Setup Swift
+        uses: fwal/setup-swift@v2
+        with:
+          swift-version: '5.10'
+      - name: Run release packaging
+        env:
+          SIGN_MODE: adhoc
+        run: ./scripts/release.sh
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Connects-beta
+          path: dist/
