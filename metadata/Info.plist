@@ -3,11 +3,11 @@
 <plist version="1.0">
 <dict>
     <key>CFBundleName</key>
-    <string>Connects</string>
+    <string>Connnected</string>
     <key>CFBundleDisplayName</key>
-    <string>Connects</string>
+    <string>Connnected</string>
     <key>CFBundleExecutable</key>
-    <string>ConnectsMenu</string>
+    <string>ConnnectedMenu</string>
     <key>CFBundleIdentifier</key>
     <string>__BUNDLE_IDENTIFIER__</string>
     <key>CFBundleVersion</key>

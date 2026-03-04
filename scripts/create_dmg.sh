@@ -2,9 +2,9 @@
 set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 DIST_DIR="${ROOT_DIR}/dist"
-APP_NAME="Connects"
+APP_NAME="Connnected"
 APP_DIR="${DIST_DIR}/${APP_NAME}.app"
-VERSION_FILE="${ROOT_DIR}/Sources/ConnectsMenu/Version.swift"
+VERSION_FILE="${ROOT_DIR}/Sources/ConnnectedMenu/Version.swift"
 if [[ -z "${APP_VERSION:-}" ]]; then
   APP_VERSION="$(sed -nE 's/.*version = "([^"]+)".*/\1/p' "${VERSION_FILE}")"
 fi

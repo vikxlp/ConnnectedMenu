@@ -2,16 +2,16 @@
 import PackageDescription
 
 let package = Package(
-    name: "ConnectsMenu",
+    name: "ConnnectedMenu",
     platforms: [
         .macOS(.v14)
     ],
     products: [
-        .executable(name: "ConnectsMenu", targets: ["ConnectsMenu"])
+        .executable(name: "ConnnectedMenu", targets: ["ConnnectedMenu"])
     ],
     targets: [
         .executableTarget(
-            name: "ConnectsMenu",
+            name: "ConnnectedMenu",
             linkerSettings: [
                 .linkedFramework("AppKit"),
                 .linkedFramework("AVFoundation"),

@@ -1,4 +1,4 @@
-# Connects (macOS Menu Bar App)
+# Connnected (macOS Menu Bar App)
 
 A lightweight menu bar app that makes macOS hardware/device info readable at a glance.
 
@@ -7,7 +7,7 @@ A lightweight menu bar app that makes macOS hardware/device info readable at a g
 - Scope: personal sideload beta focused on read-only visibility and settings shortcuts.
 
 ## GitHub distribution
-- Create a public repository (recommended name: `connects`).
+- Create a public repository (recommended name: `connnected`).
 - Add remote and push beta branch/tag:
 ```bash
 git remote add origin <your-github-repo-url>
@@ -49,7 +49,7 @@ swift run
 - Some settings deep-links vary by macOS release; if a URL does not open, use the fallback System Information button.
 
 ## Install Beta
-- Download `Connects-v0.1.0-beta.1.dmg` from GitHub Releases.
-- Open the DMG, drag `Connects.app` to `/Applications`.
+- Download `Connnected-v0.1.0-beta.1.dmg` from GitHub Releases.
+- Open the DMG, drag `Connnected.app` to `/Applications`.
 - Launch once via right-click ▶ Open if Gatekeeper blocks the unsigned build; this registers the app.
 - Future versions will be notarized once Developer ID signing is enabled.

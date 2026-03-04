@@ -1,7 +1,7 @@
 import SwiftUI
 
 @main
-struct ConnectsMenuApp: App {
+struct ConnnectedMenuApp: App {
     @StateObject private var store = DeviceStore()
 
     var body: some Scene {
@@ -10,7 +10,7 @@ struct ConnectsMenuApp: App {
                 .environmentObject(store)
                 .frame(minWidth: 420, maxWidth: 520, minHeight: 520, maxHeight: 720)
         } label: {
-            Label("Connects", systemImage: "cable.connector")
+            Label("Connnected", systemImage: "cable.connector")
         }
         .menuBarExtraStyle(.window)
     }
@@ -28,7 +28,7 @@ struct ContentView: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 HStack {
-                    Text("Connects")
+                    Text("Connnected")
                         .font(.headline)
                     Spacer(minLength: 0)
                 }

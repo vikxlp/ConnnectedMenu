@@ -3,17 +3,17 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 DIST_DIR="${ROOT_DIR}/dist"
-APP_NAME="Connects"
-EXECUTABLE_NAME="ConnectsMenu"
+APP_NAME="Connnected"
+EXECUTABLE_NAME="ConnnectedMenu"
 APP_DIR="${DIST_DIR}/${APP_NAME}.app"
 CONTENTS_DIR="${APP_DIR}/Contents"
 MACOS_DIR="${CONTENTS_DIR}/MacOS"
 RESOURCES_DIR="${CONTENTS_DIR}/Resources"
 TEMPLATE_PLIST="${ROOT_DIR}/metadata/Info.plist"
 PLIST_FILE="${CONTENTS_DIR}/Info.plist"
-VERSION_FILE="${ROOT_DIR}/Sources/ConnectsMenu/Version.swift"
+VERSION_FILE="${ROOT_DIR}/Sources/ConnnectedMenu/Version.swift"
 SIGN_MODE="${SIGN_MODE:-adhoc}"
-BUNDLE_IDENTIFIER="${BUNDLE_IDENTIFIER:-me.vikalp.connects}"
+BUNDLE_IDENTIFIER="${BUNDLE_IDENTIFIER:-me.vikalp.connnected}"
 
 if [[ ! -f "${VERSION_FILE}" ]]; then
   echo "Version file not found: ${VERSION_FILE}" >&2

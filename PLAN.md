@@ -1,4 +1,4 @@
-# Connects Plan
+# Connnected Plan
 
 ## Current Status
 - v1 menubar app is implemented with grouped `External` and `Built-in` lists.

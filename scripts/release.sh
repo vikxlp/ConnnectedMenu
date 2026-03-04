@@ -2,7 +2,7 @@
 set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 DIST_DIR="${ROOT_DIR}/dist"
-APP_VERSION="${APP_VERSION:-$(sed -nE 's/.*version = "([^"]+)".*/\1/p' "${ROOT_DIR}/Sources/ConnectsMenu/Version.swift")}"
+APP_VERSION="${APP_VERSION:-$(sed -nE 's/.*version = "([^"]+)".*/\1/p' "${ROOT_DIR}/Sources/ConnnectedMenu/Version.swift")}"
 SIGN_MODE="${SIGN_MODE:-adhoc}"
 export APP_VERSION SIGN_MODE
 

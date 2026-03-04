@@ -1,4 +1,4 @@
-# Connects Feature List
+# Connnected Feature List
 
 ## Core Value
 - Menubar-first hardware visibility for ports, connections, and I/O devices.
@@ -7,7 +7,7 @@
 ## Layout
 - Menu bar app with icon and dropdown window UI.
 - Header row:
-  - App title (`Connects`)
+  - App title (`Connnected`)
   - Centered segmented tabs (`All` / `Active`) with no visible `Filter` label
   - Refresh icon button
 - Main content:
@@ -71,7 +71,7 @@
 ## ASCII Layout Reference
 ```text
 +------------------------------------------------------+
-| Connects              [ All | Active ]            ⟳ |
+| Connnected              [ All | Active ]            ⟳ |
 |                                                      |
 | [ext-icon] External                                  |
 |   (◯kind) Device name                    (transport) |

@@ -1,11 +1,11 @@
 # Changelog
 
-All notable changes to Connects are documented in this file.
+All notable changes to Connnected are documented in this file.
 
 ## v0.1.0-beta.1 - 2026-03-04
 
 ### Added
-- Initial Connects beta menubar app with grouped hardware visibility.
+- Initial Connnected beta menubar app with grouped hardware visibility.
 - Device discovery for Bluetooth, USB, camera, microphone, speaker/output, and external displays.
 - Polling-based refresh model with heavy collector caching.
 - External/Built-in grouped list with row click actions and settings deep-links.
