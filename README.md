@@ -6,6 +6,16 @@ A lightweight menu bar app that makes macOS hardware/device info readable at a g
 - Version: `0.1.0-beta.1`
 - Scope: personal sideload beta focused on read-only visibility and settings shortcuts.
 
+## GitHub distribution
+- Create a public repository (recommended name: `connects`).
+- Add remote and push beta branch/tag:
+```bash
+git remote add origin <your-github-repo-url>
+git push -u origin codex/beta-v0.1.0-beta.1
+git push origin v0.1.0-beta.1
+```
+- Publish binaries using GitHub Releases (DMG + checksums).
+
 ## v1 implemented
 - Menu bar icon + dropdown window UI
 - Polling refresh every 2 seconds
