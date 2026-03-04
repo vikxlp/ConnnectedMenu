@@ -9,6 +9,7 @@ All notable changes to Connects are documented in this file.
 - Device discovery for Bluetooth, USB, camera, microphone, speaker/output, and external displays.
 - Polling-based refresh model with heavy collector caching.
 - External/Built-in grouped list with row click actions and settings deep-links.
+- Packaging scripts + GitHub Actions workflow for DMG releases (unsigned, Gatekeeper note).
 
 ### Changed
 - Refined menu UI with centered tabs, hover polish, and aligned section/list lanes.
