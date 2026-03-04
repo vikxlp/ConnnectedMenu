@@ -2,6 +2,10 @@
 
 A lightweight menu bar app that makes macOS hardware/device info readable at a glance.
 
+## Release
+- Version: `0.1.0-beta.1`
+- Scope: personal sideload beta focused on read-only visibility and settings shortcuts.
+
 ## v1 implemented
 - Menu bar icon + dropdown window UI
 - Polling refresh every 2 seconds
