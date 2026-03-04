@@ -21,28 +21,49 @@ struct ContentView: View {
     @State private var activeOnly = false
     @State private var selectedRowID: UUID?
     @State private var keyMonitor: Any?
+    @State private var isRefreshHovered = false
+    private let headerSideWidth: CGFloat = 120
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text("Connects")
-                    .font(.headline)
-                Spacer()
-                Text("Filter")
-                    .foregroundStyle(.secondary)
-                Picker("Filter", selection: $activeOnly) {
+                HStack {
+                    Text("Connects")
+                        .font(.headline)
+                    Spacer(minLength: 0)
+                }
+                .frame(width: headerSideWidth, alignment: .leading)
+
+                Spacer(minLength: 0)
+
+                Picker("", selection: $activeOnly) {
                     Text("All").tag(false)
                     Text("Active").tag(true)
                 }
+                .labelsHidden()
                 .pickerStyle(.segmented)
                 .frame(width: 130)
+
+                Spacer(minLength: 0)
+
                 Button {
                     store.refreshNow(forceHeavy: true)
                 } label: {
                     Image(systemName: "arrow.clockwise")
+                        .frame(width: 24, height: 24)
+                        .background {
+                            if isRefreshHovered {
+                                RoundedRectangle(cornerRadius: 6, style: .continuous)
+                                    .fill(.quinary)
+                            }
+                        }
                 }
                 .help("Refresh now")
                 .buttonStyle(.borderless)
+                .onHover { hovering in
+                    isRefreshHovered = hovering
+                }
+                .frame(width: headerSideWidth, alignment: .trailing)
             }
 
             ScrollView {
@@ -156,23 +177,27 @@ struct ContentView: View {
 
 struct GroupCard: View {
     let group: DeviceGroupSection
+    private let rowHorizontalInset: CGFloat = 6
+    private let iconLaneWidth: CGFloat = 26
+    private let laneSpacing: CGFloat = 10
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            HStack(spacing: 10) {
+            HStack(spacing: laneSpacing) {
                 Image(systemName: group.icon)
-                    .frame(width: 26, height: 26, alignment: .center)
+                    .frame(width: iconLaneWidth, height: iconLaneWidth, alignment: .center)
                     .foregroundStyle(.secondary)
                 Text(group.title)
                     .font(.title3.weight(.semibold))
             }
+            .padding(.horizontal, rowHorizontalInset)
 
             if group.rows.isEmpty {
                 Text("No devices detected")
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .padding(.vertical, 2)
-                    .padding(.leading, 36)
+                    .padding(.leading, rowHorizontalInset + iconLaneWidth + laneSpacing)
             } else {
                 ForEach(group.rows) { row in
                     RowView(row: row)
@@ -185,6 +210,7 @@ struct GroupCard: View {
 
 struct RowView: View {
     let row: DeviceRow
+    @State private var isHovered = false
 
     var body: some View {
         HStack(alignment: .center, spacing: 10) {
@@ -226,11 +252,20 @@ struct RowView: View {
         }
         .padding(.vertical, 5)
         .padding(.horizontal, 6)
+        .background {
+            if isHovered {
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .fill(.quinary)
+            }
+        }
         .contentShape(Rectangle())
         .onTapGesture {
             if let url = row.settingsURL {
                 NSWorkspace.shared.open(url)
             }
+        }
+        .onHover { hovering in
+            isHovered = hovering
         }
         .help("Open settings")
     }
