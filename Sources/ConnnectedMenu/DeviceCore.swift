@@ -107,7 +107,7 @@ enum DetailConfidence {
 }
 
 struct DeviceRow: Identifiable {
-    let id = UUID()
+    let id: String
     let group: DeviceGroupType
     let kind: DeviceKind
     let transport: TransportType
@@ -119,12 +119,62 @@ struct DeviceRow: Identifiable {
     let isActive: Bool
     let settingsURL: URL?
 
+    init(
+        id: String? = nil,
+        group: DeviceGroupType,
+        kind: DeviceKind,
+        transport: TransportType,
+        name: String,
+        subtitle: String,
+        detail: String,
+        detailConfidence: DetailConfidence,
+        connectionType: ConnectionType,
+        isActive: Bool,
+        settingsURL: URL?
+    ) {
+        self.group = group
+        self.kind = kind
+        self.transport = transport
+        self.name = name
+        self.subtitle = subtitle
+        self.detail = detail
+        self.detailConfidence = detailConfidence
+        self.connectionType = connectionType
+        self.isActive = isActive
+        self.settingsURL = settingsURL
+        self.id = id ?? DeviceRow.makeID(
+            group: group,
+            kind: kind,
+            transport: transport,
+            name: name,
+            subtitle: subtitle
+        )
+    }
+
     var statusColor: Color {
         isActive ? .green : .blue
     }
 
     var transportTooltip: String {
         detail.isEmpty ? transport.label : "\(transport.label) • \(detail)"
+    }
+
+    private static func makeID(
+        group: DeviceGroupType,
+        kind: DeviceKind,
+        transport: TransportType,
+        name: String,
+        subtitle: String
+    ) -> String {
+        [
+            String(describing: group),
+            String(describing: kind),
+            String(describing: transport),
+            name,
+            subtitle
+        ]
+            .joined(separator: "|")
+            .lowercased()
     }
 }
 
@@ -259,7 +309,7 @@ enum DeviceCollector {
 
     private static func collectCameras() -> [DeviceRow] {
         let discovery = AVCaptureDevice.DiscoverySession(
-            deviceTypes: [.builtInWideAngleCamera, .external],
+            deviceTypes: [.builtInWideAngleCamera, .external, .continuityCamera],
             mediaType: .video,
             position: .unspecified
         )
@@ -319,41 +369,64 @@ enum DeviceCollector {
             let group: DeviceGroupType = connection == .internalDevice ? .builtIn : .external
 
             if audioChannelCount(deviceID: deviceID, scope: kAudioDevicePropertyScopeInput) > 0 {
-                inputs.append(
-                    DeviceRow(
-                        group: group,
-                        kind: .microphone,
-                        transport: transport,
-                        name: name,
-                        subtitle: connection == .internalDevice ? "Built-in Microphone" : "External Microphone",
-                        detail: transportLabel,
-                        detailConfidence: .exact,
-                        connectionType: connection,
-                        isActive: isRunning,
-                        settingsURL: soundSettingsURL
-                    )
-                )
+                inputs.append(makeAudioRow(
+                    group: group,
+                    kind: .microphone,
+                    name: name,
+                    transport: transport,
+                    transportLabel: transportLabel,
+                    connection: connection,
+                    isRunning: isRunning
+                ))
             }
 
             if audioChannelCount(deviceID: deviceID, scope: kAudioDevicePropertyScopeOutput) > 0 {
-                outputs.append(
-                    DeviceRow(
-                        group: group,
-                        kind: .speaker,
-                        transport: transport,
-                        name: name,
-                        subtitle: connection == .internalDevice ? "Built-in Output" : "External Output",
-                        detail: transportLabel,
-                        detailConfidence: .exact,
-                        connectionType: connection,
-                        isActive: isRunning,
-                        settingsURL: soundSettingsURL
-                    )
-                )
+                outputs.append(makeAudioRow(
+                    group: group,
+                    kind: .speaker,
+                    name: name,
+                    transport: transport,
+                    transportLabel: transportLabel,
+                    connection: connection,
+                    isRunning: isRunning
+                ))
             }
         }
 
         return (inputs, outputs)
+    }
+
+    private static func makeAudioRow(
+        group: DeviceGroupType,
+        kind: DeviceKind,
+        name: String,
+        transport: TransportType,
+        transportLabel: String,
+        connection: ConnectionType,
+        isRunning: Bool
+    ) -> DeviceRow {
+        let subtitle: String
+        switch kind {
+        case .microphone:
+            subtitle = connection == .internalDevice ? "Built-in Microphone" : "External Microphone"
+        case .speaker:
+            subtitle = connection == .internalDevice ? "Built-in Output" : "External Output"
+        default:
+            subtitle = connection == .internalDevice ? "Built-in" : "External"
+        }
+
+        return DeviceRow(
+            group: group,
+            kind: kind,
+            transport: transport,
+            name: name,
+            subtitle: subtitle,
+            detail: transportLabel,
+            detailConfidence: .exact,
+            connectionType: connection,
+            isActive: isRunning,
+            settingsURL: soundSettingsURL
+        )
     }
 
     private static func getAllAudioDeviceIDs() -> [AudioObjectID] {
@@ -383,11 +456,17 @@ enum DeviceCollector {
             mElement: kAudioObjectPropertyElementMain
         )
 
-        var name: CFString = "Unknown Audio Device" as CFString
-        var size = UInt32(MemoryLayout<CFString>.size)
+        var name: CFString?
+        var size = UInt32(MemoryLayout<CFString?>.size)
 
-        let status = AudioObjectGetPropertyData(deviceID, &propertyAddress, 0, nil, &size, &name)
-        return status == noErr ? (name as String) : "Unknown Audio Device"
+        let status = withUnsafeMutablePointer(to: &name) { ptr in
+            AudioObjectGetPropertyData(deviceID, &propertyAddress, 0, nil, &size, ptr)
+        }
+
+        if status == noErr, let name {
+            return name as String
+        }
+        return "Unknown Audio Device"
     }
 
     private static func audioChannelCount(deviceID: AudioObjectID, scope: AudioObjectPropertyScope) -> Int {
@@ -402,14 +481,18 @@ enum DeviceCollector {
             return 0
         }
 
-        let ptr = UnsafeMutablePointer<AudioBufferList>.allocate(capacity: Int(propertySize))
-        defer { ptr.deallocate() }
+        let rawBuffer = UnsafeMutableRawPointer.allocate(
+            byteCount: Int(propertySize),
+            alignment: MemoryLayout<AudioBufferList>.alignment
+        )
+        defer { rawBuffer.deallocate() }
 
-        guard AudioObjectGetPropertyData(deviceID, &propertyAddress, 0, nil, &propertySize, ptr) == noErr else {
+        let bufferList = rawBuffer.bindMemory(to: AudioBufferList.self, capacity: 1)
+        guard AudioObjectGetPropertyData(deviceID, &propertyAddress, 0, nil, &propertySize, bufferList) == noErr else {
             return 0
         }
 
-        let buffers = UnsafeMutableAudioBufferListPointer(ptr)
+        let buffers = UnsafeMutableAudioBufferListPointer(bufferList)
         return buffers.reduce(0) { $0 + Int($1.mNumberChannels) }
     }
 
@@ -516,7 +599,15 @@ enum DeviceCollector {
             return [:]
         }
 
-        process.waitUntilExit()
+        let timeoutSeconds: TimeInterval = 4
+        let deadline = Date().addingTimeInterval(timeoutSeconds)
+        while process.isRunning && Date() < deadline {
+            Thread.sleep(forTimeInterval: 0.05)
+        }
+        if process.isRunning {
+            process.terminate()
+            return [:]
+        }
 
         guard process.terminationStatus == 0 else { return [:] }
         let data = output.fileHandleForReading.readDataToEndOfFile()
