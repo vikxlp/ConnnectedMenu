@@ -1,4 +1,5 @@
 import SwiftUI
+import AppKit
 
 private func openSettingsURL(_ url: URL?) {
     guard let url else { return }
@@ -13,11 +14,18 @@ struct ConnnectedMenuApp: App {
         MenuBarExtra {
             ContentView()
                 .environmentObject(store)
-                .frame(minWidth: 420, maxWidth: 520, minHeight: 520, maxHeight: 720)
+                .frame(minWidth: 300, maxWidth: 300, minHeight: 300, maxHeight: 560)
         } label: {
             Label("Connnected", systemImage: "cable.connector")
         }
         .menuBarExtraStyle(.window)
+    }
+}
+
+private struct ContentHeightKey: PreferenceKey {
+    static var defaultValue: CGFloat = 0
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = max(value, nextValue())
     }
 }
 
@@ -27,14 +35,33 @@ struct ContentView: View {
     @State private var selectedRowID: String?
     @State private var keyMonitor: Any?
     @State private var isRefreshHovered = false
-    private let headerSideWidth: CGFloat = 120
+    @State private var isMenuHovered = false
+    @State private var isMenuOpen = false
+    @State private var contentHeight: CGFloat = 0
+    @State private var headerHeight: CGFloat = 0
+    private let headerSideWidth: CGFloat = 90
+    private let minMenuHeight: CGFloat = 300
+    private let maxMenuHeight: CGFloat = 560
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        let listContent = LazyVStack(alignment: .leading, spacing: 6) {
+            ForEach(Array(filteredGroups.enumerated()), id: \.element.id) { index, group in
+                GroupCard(group: group)
+                if index < filteredGroups.count - 1 {
+                    Divider()
+                        .padding(.vertical, 4)
+                }
+            }
+        }
+
+        let totalHeight = headerHeight + contentHeight + 12 + 12 + 8
+        let clampedHeight = min(max(totalHeight, minMenuHeight), maxMenuHeight)
+
+        VStack(alignment: .leading, spacing: 8) {
             HStack {
                 HStack {
                     Text("Connnected")
-                        .font(.headline)
+                        .font(.callout.weight(.semibold))
                     Spacer(minLength: 0)
                 }
                 .frame(width: headerSideWidth, alignment: .leading)
@@ -47,59 +74,82 @@ struct ContentView: View {
                 }
                 .labelsHidden()
                 .pickerStyle(.segmented)
-                .frame(width: 130)
+                .frame(width: 110)
 
                 Spacer(minLength: 0)
 
-                Button {
-                    store.refreshNow(forceHeavy: true)
-                } label: {
-                    Image(systemName: "arrow.clockwise")
-                        .frame(width: 24, height: 24)
-                        .background {
-                            if isRefreshHovered {
-                                RoundedRectangle(cornerRadius: 6, style: .continuous)
-                                    .fill(.quinary)
+                HStack(spacing: 6) {
+                    Button {
+                        store.refreshNow(forceHeavy: true)
+                    } label: {
+                        Image(systemName: "arrow.clockwise")
+                            .frame(width: 24, height: 24)
+                            .background {
+                                if isRefreshHovered {
+                                    RoundedRectangle(cornerRadius: 6, style: .continuous)
+                                        .fill(.quinary)
+                                }
                             }
-                        }
-                }
-                .help("Refresh now")
-                .buttonStyle(.borderless)
-                .onHover { hovering in
-                    isRefreshHovered = hovering
-                }
-                .frame(width: headerSideWidth, alignment: .trailing)
-            }
+                    }
+                    .help("Refresh now")
+                    .buttonStyle(.borderless)
+                    .onHover { hovering in
+                        isRefreshHovered = hovering
+                    }
 
-            ScrollView {
-                LazyVStack(alignment: .leading, spacing: 10) {
-                    ForEach(Array(filteredGroups.enumerated()), id: \.element.id) { index, group in
-                        GroupCard(group: group)
-                        if index < filteredGroups.count - 1 {
-                            Divider()
-                                .padding(.vertical, 4)
+                    DotMenuButton(
+                        isHovered: $isMenuHovered,
+                        isOpen: $isMenuOpen,
+                        openSystemInfo: {
+                            NSWorkspace.shared.open(URL(fileURLWithPath: "/System/Applications/Utilities/System Information.app"))
+                        },
+                        quit: {
+                            NSApplication.shared.terminate(nil)
+                        }
+                    )
+                    .frame(width: 24, height: 24)
+                    .background {
+                        if isMenuHovered || isMenuOpen {
+                            RoundedRectangle(cornerRadius: 6, style: .continuous)
+                                .fill(.quinary)
                         }
                     }
                 }
-                .padding(.bottom, 4)
+                .frame(width: headerSideWidth, alignment: .trailing)
+            }
+            .background(
+                GeometryReader { proxy in
+                    Color.clear.preference(key: ContentHeightKey.self, value: proxy.size.height)
+                }
+            )
+
+            ViewThatFits(in: .vertical) {
+                listContent
+                    .padding(.bottom, 4)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                ScrollView {
+                    listContent
+                        .padding(.bottom, 4)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .frame(maxHeight: .infinity, alignment: .top)
             }
 
-            HStack {
-                Button("Open System Information") {
-                    NSWorkspace.shared.open(URL(fileURLWithPath: "/System/Applications/Utilities/System Information.app"))
-                }
-                .buttonStyle(.borderless)
-
-                Spacer()
-
-                Button("Quit") {
-                    NSApplication.shared.terminate(nil)
-                }
-                .buttonStyle(.borderedProminent)
-            }
-            .padding(.top, 6)
         }
-        .padding(14)
+        .padding(12)
+        .background(
+            GeometryReader { proxy in
+                Color.clear.preference(key: ContentHeightKey.self, value: proxy.size.height)
+            }
+        )
+        .onPreferenceChange(ContentHeightKey.self) { newValue in
+            if newValue > headerHeight + 1 {
+                contentHeight = newValue - headerHeight - 12 - 12 - 8
+            } else {
+                headerHeight = newValue
+            }
+        }
+        .frame(height: clampedHeight)
         .onAppear {
             store.start()
             ensureSelection()
@@ -179,20 +229,142 @@ struct ContentView: View {
     }
 }
 
+private final class HoverButton: NSButton {
+    var onHoverChanged: ((Bool) -> Void)?
+
+    private var trackingAreaRef: NSTrackingArea?
+
+    override func updateTrackingAreas() {
+        super.updateTrackingAreas()
+        if let trackingAreaRef {
+            removeTrackingArea(trackingAreaRef)
+        }
+        let tracking = NSTrackingArea(
+            rect: bounds,
+            options: [.activeInKeyWindow, .mouseEnteredAndExited, .inVisibleRect],
+            owner: self,
+            userInfo: nil
+        )
+        addTrackingArea(tracking)
+        trackingAreaRef = tracking
+    }
+
+    override func mouseEntered(with event: NSEvent) {
+        super.mouseEntered(with: event)
+        onHoverChanged?(true)
+    }
+
+    override func mouseExited(with event: NSEvent) {
+        super.mouseExited(with: event)
+        onHoverChanged?(false)
+    }
+}
+
+private struct DotMenuButton: NSViewRepresentable {
+    @Binding var isHovered: Bool
+    @Binding var isOpen: Bool
+    let openSystemInfo: () -> Void
+    let quit: () -> Void
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(parent: self)
+    }
+
+    func makeNSView(context: Context) -> HoverButton {
+        let button = HoverButton()
+        button.isBordered = false
+        button.bezelStyle = .regularSquare
+        button.imagePosition = .imageOnly
+        button.onHoverChanged = { hovering in
+            context.coordinator.parent.isHovered = hovering
+        }
+        let image = NSImage(systemSymbolName: "ellipsis", accessibilityDescription: "More options")
+        image?.isTemplate = true
+        button.image = image
+        button.contentTintColor = NSColor.labelColor
+        button.target = context.coordinator
+        button.action = #selector(Coordinator.showMenu(_:))
+        return button
+    }
+
+    func updateNSView(_ nsView: HoverButton, context: Context) {
+        nsView.onHoverChanged = { hovering in
+            context.coordinator.parent.isHovered = hovering
+        }
+    }
+
+    final class Coordinator: NSObject, NSMenuDelegate {
+        var parent: DotMenuButton
+
+        init(parent: DotMenuButton) {
+            self.parent = parent
+        }
+
+        @objc func showMenu(_ sender: NSButton) {
+            let menu = NSMenu()
+            menu.delegate = self
+
+            let openItem = NSMenuItem(
+                title: "Open System Information",
+                action: #selector(openSystemInfoAction),
+                keyEquivalent: ""
+            )
+            openItem.target = self
+            menu.addItem(openItem)
+
+            menu.addItem(.separator())
+
+            let quitItem = NSMenuItem(
+                title: "Quit",
+                action: #selector(quitAction),
+                keyEquivalent: ""
+            )
+            quitItem.target = self
+            menu.addItem(quitItem)
+
+            parent.isOpen = true
+            if let window = sender.window {
+                let rectInWindow = sender.convert(sender.bounds, to: nil)
+                let rectOnScreen = window.convertToScreen(rectInWindow)
+                let point = NSPoint(x: rectOnScreen.minX, y: rectOnScreen.minY - 6)
+                menu.popUp(positioning: nil, at: point, in: nil)
+            } else {
+                let point = NSPoint(x: 0, y: -sender.bounds.height - 6)
+                menu.popUp(positioning: nil, at: point, in: sender)
+            }
+        }
+
+        func menuDidClose(_ menu: NSMenu) {
+            parent.isOpen = false
+        }
+
+        @objc private func openSystemInfoAction() {
+            parent.openSystemInfo()
+            parent.isOpen = false
+        }
+
+        @objc private func quitAction() {
+            parent.quit()
+            parent.isOpen = false
+        }
+    }
+}
+
 struct GroupCard: View {
     let group: DeviceGroupSection
-    private let rowHorizontalInset: CGFloat = 6
+    private let rowHorizontalInset: CGFloat = 8
     private let iconLaneWidth: CGFloat = 26
     private let laneSpacing: CGFloat = 10
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: 4) {
             HStack(spacing: laneSpacing) {
                 Image(systemName: group.icon)
                     .frame(width: iconLaneWidth, height: iconLaneWidth, alignment: .center)
                     .foregroundStyle(.secondary)
                 Text(group.title)
-                    .font(.title3.weight(.semibold))
+                    .font(.callout.weight(.semibold))
+                    .foregroundStyle(.secondary)
             }
             .padding(.horizontal, rowHorizontalInset)
 
@@ -208,7 +380,7 @@ struct GroupCard: View {
                 }
             }
         }
-        .padding(.vertical, 4)
+        .padding(.vertical, 2)
     }
 }
 
@@ -230,10 +402,10 @@ struct RowView: View {
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(row.name)
-                    .font(.title3)
+                    .font(.body)
                     .foregroundStyle(.primary)
                 Text(row.isActive ? "\(row.subtitle) • Active" : row.subtitle)
-                    .font(.body)
+                    .font(.caption)
                     .foregroundStyle(.secondary)
             }
 
@@ -254,8 +426,8 @@ struct RowView: View {
                 }
             }
         }
-        .padding(.vertical, 5)
-        .padding(.horizontal, 6)
+        .padding(.vertical, 4)
+        .padding(.horizontal, 8)
         .background {
             if isHovered {
                 RoundedRectangle(cornerRadius: 8, style: .continuous)
