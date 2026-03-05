@@ -10,13 +10,12 @@
   - App title (`Connnected`)
   - Centered segmented tabs (`All` / `Active`) with no visible `Filter` label
   - Refresh icon button
+  - 3-dot overflow menu (System Information, Quit)
 - Main content:
   - Plain sectioned list (no card backgrounds)
 - Section divider between top-level sections only
 - No per-row divider
-- Footer actions:
-  - `Open System Information`
-  - `Quit`
+- Footer actions removed (moved to overflow menu).
 
 ## Distribution Notes
 - App installed via DMG packaged from release branch.
@@ -71,7 +70,7 @@
 ## ASCII Layout Reference
 ```text
 +------------------------------------------------------+
-| Connnected              [ All | Active ]            ⟳ |
+| Connnected              [ All | Active ]        ⟳  ⋯ |
 |                                                      |
 | [ext-icon] External                                  |
 |   (◯kind) Device name                    (transport) |
@@ -87,7 +86,7 @@
 |   (◯kind) Device name                                |
 |          subtitle                                     |
 |                                                      |
-| Open System Information                        [Quit] |
+| (Overflow menu: Open System Information, Quit)       |
 +------------------------------------------------------+
 ```
 

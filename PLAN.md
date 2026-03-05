@@ -24,3 +24,4 @@
 - Optional UX improvements:
   - Inline transport detail text fallback if tooltip behavior is inconsistent on some macOS versions.
   - Add compact device history/timeline for connect/disconnect events.
+  - Add Settings/Preferences UI for configuring refresh interval, filters, and display options.
