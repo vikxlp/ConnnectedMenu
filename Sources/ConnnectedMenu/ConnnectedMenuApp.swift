@@ -1,5 +1,10 @@
 import SwiftUI
 
+private func openSettingsURL(_ url: URL?) {
+    guard let url else { return }
+    NSWorkspace.shared.open(url)
+}
+
 @main
 struct ConnnectedMenuApp: App {
     @StateObject private var store = DeviceStore()
@@ -19,7 +24,7 @@ struct ConnnectedMenuApp: App {
 struct ContentView: View {
     @EnvironmentObject var store: DeviceStore
     @State private var activeOnly = false
-    @State private var selectedRowID: UUID?
+    @State private var selectedRowID: String?
     @State private var keyMonitor: Any?
     @State private var isRefreshHovered = false
     private let headerSideWidth: CGFloat = 120
@@ -151,8 +156,7 @@ struct ContentView: View {
     private func openSelectedRow() {
         guard let selectedRowID else { return }
         guard let row = visibleRows.first(where: { $0.id == selectedRowID }) else { return }
-        guard let url = row.settingsURL else { return }
-        NSWorkspace.shared.open(url)
+        openSettingsURL(row.settingsURL)
     }
 
     private func installKeyboardMonitor() {
@@ -260,9 +264,7 @@ struct RowView: View {
         }
         .contentShape(Rectangle())
         .onTapGesture {
-            if let url = row.settingsURL {
-                NSWorkspace.shared.open(url)
-            }
+            openSettingsURL(row.settingsURL)
         }
         .onHover { hovering in
             isHovered = hovering
