@@ -4,7 +4,7 @@ import AVFoundation
 import CoreAudio
 import CoreGraphics
 
-enum DeviceGroupType {
+enum DeviceGroupType: Hashable {
     case external
     case builtIn
 
@@ -179,7 +179,7 @@ struct DeviceRow: Identifiable {
 }
 
 struct DeviceGroupSection: Identifiable {
-    let id = UUID()
+    var id: DeviceGroupType { type }
     let type: DeviceGroupType
     let rows: [DeviceRow]
 
