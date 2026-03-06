@@ -29,8 +29,9 @@ private enum LayoutMetrics {
 }
 
 private enum ListMetrics {
-    static let listContentLeadingInset: CGFloat = 12
-    static let listContentTrailingInset: CGFloat = 12
+    static let listContentLeadingInset: CGFloat = 4
+    static let listContentTrailingInset: CGFloat = 4
+    static let headerContentInset: CGFloat = 12
     static let sectionTitleTopPadding: CGFloat = 4
     static let sectionTitleBottomPadding: CGFloat = 4
     static let rowVerticalPadding: CGFloat = 4
@@ -73,6 +74,11 @@ private extension View {
     func laneHorizontalInsets() -> some View {
         padding(.leading, ListMetrics.listContentLeadingInset)
             .padding(.trailing, ListMetrics.listContentTrailingInset)
+    }
+
+    func headerHorizontalInsets() -> some View {
+        padding(.leading, ListMetrics.headerContentInset)
+            .padding(.trailing, ListMetrics.headerContentInset)
     }
 }
 
@@ -205,7 +211,7 @@ struct ContentView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.top, ListMetrics.headerTopPadding)
         .padding(.bottom, ListMetrics.headerBottomPadding)
-        .laneHorizontalInsets()
+        .headerHorizontalInsets()
     }
 }
 
