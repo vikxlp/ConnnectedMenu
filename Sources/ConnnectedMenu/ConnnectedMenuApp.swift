@@ -156,48 +156,51 @@ struct ContentView: View {
     }
 
     private var headerRow: some View {
-        HStack(spacing: ListMetrics.headerActionGap) {
+        HStack {
             Text("Connnected")
                 .font(.headline.weight(.medium))
+                .layoutPriority(1)
 
             Spacer(minLength: 0)
 
-            Button {
-                store.refreshNow(forceHeavy: true)
-            } label: {
-                Image(systemName: "arrow.clockwise")
-            }
-            .buttonStyle(.plain)
-            .help("Refresh now")
+            HStack(spacing: ListMetrics.headerActionGap) {
+                Button {
+                    store.refreshNow(forceHeavy: true)
+                } label: {
+                    Image(systemName: "arrow.clockwise")
+                }
+                .buttonStyle(.plain)
+                .help("Refresh now")
 
-            Menu {
-                Section("Filter") {
-                    Button {
-                        activeOnly = false
-                    } label: {
-                        Label("All", systemImage: activeOnly ? "checkmark" : "circle")
-                    }
+                Menu {
+                    Section("Filter") {
+                        Button {
+                            activeOnly = false
+                        } label: {
+                            Label("All", systemImage: activeOnly ? "checkmark" : "circle")
+                        }
 
-                    Button {
-                        activeOnly = true
-                    } label: {
-                        Label("Active", systemImage: activeOnly ? "checkmark" : "circle")
+                        Button {
+                            activeOnly = true
+                        } label: {
+                            Label("Active", systemImage: activeOnly ? "checkmark" : "circle")
+                        }
                     }
+                    Divider()
+                    Button("Open System Information") {
+                        NSWorkspace.shared.open(URL(fileURLWithPath: "/System/Applications/Utilities/System Information.app"))
+                    }
+                    Divider()
+                    Button("Quit") {
+                        NSApplication.shared.terminate(nil)
+                    }
+                } label: {
+                    Image(systemName: "ellipsis")
                 }
-                Divider()
-                Button("Open System Information") {
-                    NSWorkspace.shared.open(URL(fileURLWithPath: "/System/Applications/Utilities/System Information.app"))
-                }
-                Divider()
-                Button("Quit") {
-                    NSApplication.shared.terminate(nil)
-                }
-            } label: {
-                Image(systemName: "ellipsis")
+                .menuIndicator(.hidden)
+                .menuStyle(.borderlessButton)
+                .help("More options")
             }
-            .menuIndicator(.hidden)
-            .menuStyle(.borderlessButton)
-            .help("More options")
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.top, ListMetrics.headerTopPadding)
