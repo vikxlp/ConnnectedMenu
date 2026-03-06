@@ -32,6 +32,7 @@ private enum ListMetrics {
     static let listContentLeadingInset: CGFloat = 4
     static let listContentTrailingInset: CGFloat = 4
     static let headerContentInset: CGFloat = 12
+    static let rowHoverOuterInset: CGFloat = 4
     static let sectionTitleTopPadding: CGFloat = 4
     static let sectionTitleBottomPadding: CGFloat = 4
     static let rowVerticalPadding: CGFloat = 4
@@ -85,6 +86,7 @@ private extension View {
 struct ContentView: View {
     @EnvironmentObject var store: DeviceStore
     @State private var activeOnly = false
+    @State private var hoveredRowID: DeviceRow.ID?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -128,7 +130,20 @@ struct ContentView: View {
                     RowView(row: row)
                 }
                 .buttonStyle(.plain)
+                .contentShape(Rectangle())
+                .onHover { isHovering in
+                    hoveredRowID = isHovering ? row.id : nil
+                }
                 .laneAlignedRow()
+                .listRowBackground(
+                    RoundedRectangle(cornerRadius: 8, style: .continuous)
+                        .fill(
+                            hoveredRowID == row.id
+                                ? Color(nsColor: .quaternaryLabelColor).opacity(0.28)
+                                : Color.clear
+                        )
+                        .padding(.horizontal, ListMetrics.rowHoverOuterInset)
+                )
                 .listRowSeparator(.hidden)
             }
         }
