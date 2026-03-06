@@ -31,8 +31,12 @@ private enum LayoutMetrics {
 private enum ListMetrics {
     static let listContentLeadingInset: CGFloat = 12
     static let listContentTrailingInset: CGFloat = 12
-    static let sectionHeaderTopBottomPadding: CGFloat = 6
+    static let sectionTitleTopPadding: CGFloat = 4
+    static let sectionTitleBottomPadding: CGFloat = 4
     static let rowVerticalPadding: CGFloat = 4
+    static let sectionDividerTopPadding: CGFloat = 6
+    static let sectionDividerBottomPadding: CGFloat = 6
+    static let sectionDividerThickness: CGFloat = 1
     static let headerTopPadding: CGFloat = 10
     static let headerBottomPadding: CGFloat = 2
     static let headerActionGap: CGFloat = 8
@@ -81,12 +85,11 @@ struct ContentView: View {
             headerRow
 
             List {
-                ForEach(filteredGroups) { group in
-                    Section {
-                        sectionRows(for: group)
-                    } header: {
-                        sectionHeader(for: group)
-                    }
+                let groups = filteredGroups
+                ForEach(Array(groups.enumerated()), id: \.element.id) { index, group in
+                    sectionTitleRow(for: group)
+                    sectionRows(for: group)
+                    sectionDividerRow(for: index, total: groups.count)
                 }
             }
             .listStyle(.inset)
@@ -125,14 +128,31 @@ struct ContentView: View {
         }
     }
 
-    private func sectionHeader(for group: DeviceGroupSection) -> some View {
+    private func sectionTitleRow(for group: DeviceGroupSection) -> some View {
         SectionHeader(group: group)
             .textCase(nil)
             .laneAlignedRow(
-                top: ListMetrics.sectionHeaderTopBottomPadding,
-                bottom: ListMetrics.sectionHeaderTopBottomPadding
+                top: ListMetrics.sectionTitleTopPadding,
+                bottom: ListMetrics.sectionTitleBottomPadding
             )
+            .listRowBackground(Color.clear)
             .listRowSeparator(.hidden)
+    }
+
+    @ViewBuilder
+    private func sectionDividerRow(for index: Int, total: Int) -> some View {
+        if index < total - 1 {
+            Rectangle()
+                .fill(Color(nsColor: .separatorColor))
+                .frame(maxWidth: .infinity)
+                .frame(height: ListMetrics.sectionDividerThickness)
+                .laneAlignedRow(
+                    top: ListMetrics.sectionDividerTopPadding,
+                    bottom: ListMetrics.sectionDividerBottomPadding
+                )
+                .listRowBackground(Color.clear)
+                .listRowSeparator(.hidden)
+        }
     }
 
     private var headerRow: some View {
