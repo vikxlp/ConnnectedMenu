@@ -142,14 +142,6 @@ struct ContentView: View {
 
             Spacer(minLength: 0)
 
-            Picker("", selection: $activeOnly) {
-                Text("All").tag(false)
-                Text("Active").tag(true)
-            }
-            .labelsHidden()
-            .pickerStyle(.segmented)
-            .frame(width: 120)
-
             Button {
                 store.refreshNow(forceHeavy: true)
             } label: {
@@ -159,6 +151,20 @@ struct ContentView: View {
             .help("Refresh now")
 
             Menu {
+                Section("Filter") {
+                    Button {
+                        activeOnly = false
+                    } label: {
+                        Label("All", systemImage: activeOnly ? "checkmark" : "circle")
+                    }
+
+                    Button {
+                        activeOnly = true
+                    } label: {
+                        Label("Active", systemImage: activeOnly ? "checkmark" : "circle")
+                    }
+                }
+                Divider()
                 Button("Open System Information") {
                     NSWorkspace.shared.open(URL(fileURLWithPath: "/System/Applications/Utilities/System Information.app"))
                 }
