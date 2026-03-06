@@ -100,7 +100,12 @@ struct ContentView: View {
                 .foregroundStyle(.secondary)
         } else {
             ForEach(group.rows) { row in
-                RowView(row: row)
+                Button {
+                    openSettingsURL(row.settingsURL)
+                } label: {
+                    RowView(row: row)
+                }
+                .buttonStyle(.plain)
             }
         }
     }
