@@ -26,7 +26,42 @@ private enum LayoutMetrics {
     static let laneIconWidth: CGFloat = 26
     static let laneGap: CGFloat = 10
     static let trailingAccessoryLaneWidth: CGFloat = 28
+}
+
+private enum ListMetrics {
+    static let listContentLeadingInset: CGFloat = 12
+    static let listContentTrailingInset: CGFloat = 12
+    static let sectionHeaderTopBottomPadding: CGFloat = 6
     static let rowVerticalPadding: CGFloat = 4
+}
+
+private struct LaneAlignedListRowModifier: ViewModifier {
+    let top: CGFloat
+    let bottom: CGFloat
+
+    func body(content: Content) -> some View {
+        content
+            .listRowInsets(
+                EdgeInsets(
+                    top: top,
+                    leading: ListMetrics.listContentLeadingInset,
+                    bottom: bottom,
+                    trailing: ListMetrics.listContentTrailingInset
+                )
+            )
+            .alignmentGuide(.listRowSeparatorLeading) { _ in
+                ListMetrics.listContentLeadingInset
+            }
+            .alignmentGuide(.listRowSeparatorTrailing) { dimensions in
+                dimensions.width - ListMetrics.listContentTrailingInset
+            }
+    }
+}
+
+private extension View {
+    func laneAlignedRow(top: CGFloat = 0, bottom: CGFloat = 0) -> some View {
+        modifier(LaneAlignedListRowModifier(top: top, bottom: bottom))
+    }
 }
 
 struct ContentView: View {
@@ -98,6 +133,8 @@ struct ContentView: View {
             Text("No devices detected")
                 .font(.caption)
                 .foregroundStyle(.secondary)
+                .laneAlignedRow()
+                .listRowSeparator(.hidden)
         } else {
             ForEach(group.rows) { row in
                 Button {
@@ -106,12 +143,20 @@ struct ContentView: View {
                     RowView(row: row)
                 }
                 .buttonStyle(.plain)
+                .laneAlignedRow()
+                .listRowSeparator(.hidden)
             }
         }
     }
 
     private func sectionHeader(for group: DeviceGroupSection) -> some View {
         SectionHeader(group: group)
+            .textCase(nil)
+            .laneAlignedRow(
+                top: ListMetrics.sectionHeaderTopBottomPadding,
+                bottom: ListMetrics.sectionHeaderTopBottomPadding
+            )
+            .listRowSeparator(.hidden)
     }
 }
 
@@ -172,7 +217,7 @@ struct RowView: View {
             }
             .frame(width: LayoutMetrics.trailingAccessoryLaneWidth, alignment: .trailing)
         }
-        .padding(.vertical, LayoutMetrics.rowVerticalPadding)
+        .padding(.vertical, ListMetrics.rowVerticalPadding)
         .help("Open settings")
     }
 }
