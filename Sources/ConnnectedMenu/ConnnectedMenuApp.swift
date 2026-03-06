@@ -33,6 +33,9 @@ private enum ListMetrics {
     static let listContentTrailingInset: CGFloat = 12
     static let sectionHeaderTopBottomPadding: CGFloat = 6
     static let rowVerticalPadding: CGFloat = 4
+    static let headerTopPadding: CGFloat = 10
+    static let headerBottomPadding: CGFloat = 2
+    static let headerActionGap: CGFloat = 8
 }
 
 private struct LaneAlignedListRowModifier: ViewModifier {
@@ -62,6 +65,11 @@ private extension View {
     func laneAlignedRow(top: CGFloat = 0, bottom: CGFloat = 0) -> some View {
         modifier(LaneAlignedListRowModifier(top: top, bottom: bottom))
     }
+
+    func laneHorizontalInsets() -> some View {
+        padding(.leading, ListMetrics.listContentLeadingInset)
+            .padding(.trailing, ListMetrics.listContentTrailingInset)
+    }
 }
 
 struct ContentView: View {
@@ -69,7 +77,9 @@ struct ContentView: View {
     @State private var activeOnly = false
 
     var body: some View {
-        NavigationStack {
+        VStack(spacing: 0) {
+            headerRow
+
             List {
                 ForEach(filteredGroups) { group in
                     Section {
@@ -80,40 +90,6 @@ struct ContentView: View {
                 }
             }
             .listStyle(.inset)
-            .navigationTitle("Connnected")
-            .toolbar {
-                ToolbarItem(placement: .principal) {
-                    Picker("", selection: $activeOnly) {
-                        Text("All").tag(false)
-                        Text("Active").tag(true)
-                    }
-                    .labelsHidden()
-                    .pickerStyle(.segmented)
-                    .frame(width: 120)
-                }
-
-                ToolbarItemGroup(placement: .primaryAction) {
-                    Button {
-                        store.refreshNow(forceHeavy: true)
-                    } label: {
-                        Image(systemName: "arrow.clockwise")
-                    }
-                    .help("Refresh now")
-
-                    Menu {
-                        Button("Open System Information") {
-                            NSWorkspace.shared.open(URL(fileURLWithPath: "/System/Applications/Utilities/System Information.app"))
-                        }
-                        Divider()
-                        Button("Quit") {
-                            NSApplication.shared.terminate(nil)
-                        }
-                    } label: {
-                        Image(systemName: "ellipsis")
-                    }
-                    .help("More options")
-                }
-            }
         }
         .onAppear {
             store.start()
@@ -157,6 +133,50 @@ struct ContentView: View {
                 bottom: ListMetrics.sectionHeaderTopBottomPadding
             )
             .listRowSeparator(.hidden)
+    }
+
+    private var headerRow: some View {
+        HStack(spacing: ListMetrics.headerActionGap) {
+            Text("Connnected")
+                .font(.headline.weight(.medium))
+
+            Spacer(minLength: 0)
+
+            Picker("", selection: $activeOnly) {
+                Text("All").tag(false)
+                Text("Active").tag(true)
+            }
+            .labelsHidden()
+            .pickerStyle(.segmented)
+            .frame(width: 120)
+
+            Button {
+                store.refreshNow(forceHeavy: true)
+            } label: {
+                Image(systemName: "arrow.clockwise")
+            }
+            .buttonStyle(.plain)
+            .help("Refresh now")
+
+            Menu {
+                Button("Open System Information") {
+                    NSWorkspace.shared.open(URL(fileURLWithPath: "/System/Applications/Utilities/System Information.app"))
+                }
+                Divider()
+                Button("Quit") {
+                    NSApplication.shared.terminate(nil)
+                }
+            } label: {
+                Image(systemName: "ellipsis")
+            }
+            .menuIndicator(.hidden)
+            .menuStyle(.borderlessButton)
+            .help("More options")
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.top, ListMetrics.headerTopPadding)
+        .padding(.bottom, ListMetrics.headerBottomPadding)
+        .laneHorizontalInsets()
     }
 }
 
